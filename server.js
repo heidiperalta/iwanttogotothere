@@ -27,11 +27,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use('/', routes);
-app.use('/', (req, res) => {
-    console.log('I get handled');
-    res.send('I got handled');
-})
-
 
 app.listen(port, () => {
     console.log(`iwtgtt Api server listening on port ${port}`);

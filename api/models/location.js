@@ -2,9 +2,12 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 const LocationSchema = new Schema({
-    _id: Schema.ObjectId,
     user: Schema.ObjectId,
-    name: String,
+    name: {
+        type: String,
+        required: 'Location name is required'
+    },
+    notes: String,
     lat: {
         type: Number,
         required: 'Latitude is required'

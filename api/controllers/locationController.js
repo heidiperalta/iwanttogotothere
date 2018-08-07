@@ -17,6 +17,7 @@ const saveLocation = async (req, res) => {
     let location = {
         user: req.auth.user,
         name: req.body.name,
+        notes: req.body.notes,
         lat: req.body.lat,
         long: req.body.long
     };
