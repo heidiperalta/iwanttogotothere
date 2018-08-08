@@ -8,6 +8,7 @@ const LocationSchema = new Schema({
         required: 'Location name is required'
     },
     notes: String,
+    placeId: String,
     lat: {
         type: Number,
         required: 'Latitude is required'

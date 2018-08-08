@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <style>
+            .locations {
+                height: 50%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="locations map" id="map"></div>
+        <div class="locations places">
+            <h2>M'Places</h2>
+            <div id="current-position"></div>
+        </div>
+        <script>
+            // Iniciate map
+            function initMap() {
+                let currentMarker;
+                let currentPosition = { lat:40.7620582, lng:-73.9805203 };
+
+                function clearMarkers() {
+                    if (currentMarker) {
+                        currentMarker.setMap(null);
+                    }
+                }
+                
+                // Create a marker and set its position.
+                function addMarker(map, position, title) {
+                    
+                    currentMarker = new google.maps.Marker({
+                        map: map,
+                        position: position,
+                        title: title
+                    });
+
+                    if (map.zoom < 18) {
+                        map.setZoom(18);
+                    }
+                }
+
+                // Map click handler
+                function placeSelected (position) {
+                    const selectedLatLng = {
+                        lat: position.latLng.lat(),
+                        lng: position.latLng.lng()
+                    };
+
+                    clearMarkers();
+                    addMarker(this, selectedLatLng, 'Test');
+
+                    document.querySelector('#current-position')
+                        .innerHTML = `lat:${selectedLatLng.lat}, long:${selectedLatLng.lng}`;
+                }
+
+                if (!navigator.geolocation) {
+                    console.log('location not supported');
+                    return;
+                }
+
+                // Create a map object and specify the DOM element
+                // for display.
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    center: currentPosition,
+                    zoom: 18
+                });
+
+                map.addListener('click', placeSelected);
+
+                // Set current location on map
+                // TODO: put current location on nearest place
+                navigator.geolocation.getCurrentPosition( position => {
+                    currentPosition =  { 
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    map.setCenter(currentPosition);
+                    addMarker(map, currentPosition, 'I\'m here');
+                });
+            }
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDM9yoWb3ehc6NwnpjvAKxLAB2fGRytpnQ&callback=initMap" async defer></script>
+    </body>
+</html>

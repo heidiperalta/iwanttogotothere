@@ -27,6 +27,14 @@ const saveLocation = async (req, res) => {
     res.send(newLocation);
 }
 
+const getUserLocations = (req, res) => {
+    // Get user from request
+    // get user's nearby locations from database
+    // return x amonut of locations
+    // render page?
+}
+
 module.exports = {
-    saveLocation 
+    saveLocation,
+    getUserLocations
 }

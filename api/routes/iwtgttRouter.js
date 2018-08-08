@@ -18,6 +18,7 @@ router.post('/register', userController.register);
 router.post('/authenticate', userController.authenticate);
 
 // Locations
+router.get('/locations/:current', locationController.getUserLocations);
 router.post('/locations', catchErrors(locationController.saveLocation));
 
 
