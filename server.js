@@ -26,11 +26,10 @@ mongoose.connect(process.env.DB, err => {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-//app.use('/', routes);
 app.use('/api', routes);
 
 //app.use(express.static(__dirname + '/public'));
-app.use('/home', (req, res) => {
+app.use('/', (req, res) => {
     res.sendFile(path.resolve('./public/index.html'));
 })
 

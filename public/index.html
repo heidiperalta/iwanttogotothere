@@ -1,22 +1,44 @@
 <html>
     <head>
         <style>
+            html {
+                font-family:"Open Sans","Helvetica","Arial",sans-serif;
+                color: #1E1E38;
+            }
             .locations {
                 height: 50%;
+            }
+            .location-form input {
+                display: block;
+                margin: 20px 0;
+            }
+            .locations__body h2 {
+                display: inline-block;
+                margin-right: 20px;
             }
         </style>
     </head>
     <body>
         <div class="locations map" id="map"></div>
-        <div class="locations places">
+        <div class="locations locations__body">
+            <h2>I want to go to there:</h2><span id="current-position"></span>
+            
+            <div class="location-form">
+                <textarea id="location-description" rows="6" placeholder="Notes"></textarea>
+                <input type="submit" value="Save Place"/>
+            </div>
+
             <h2>M'Places</h2>
-            <div id="current-position"></div>
+            <div class="places-list-container">
+
+            </div>
         </div>
         <script>
+            
             // Iniciate map
             function initMap() {
                 let currentMarker;
-                let currentPosition = { lat:40.7620582, lng:-73.9805203 };
+                let currentPosition = { lat:40.7620582, lng:-73.9805203, placeId: null };
 
                 function clearMarkers() {
                     if (currentMarker) {
@@ -39,17 +61,16 @@
                 }
 
                 // Map click handler
-                function placeSelected (position) {
-                    const selectedLatLng = {
-                        lat: position.latLng.lat(),
-                        lng: position.latLng.lng()
-                    };
+                function onMapClick (position) {
+                    currentPosition.lat = position.latLng.lat();
+                    currentPosition.lng = position.latLng.lng();;
+                    currentPosition.placeId = position.placeId;
 
                     clearMarkers();
-                    addMarker(this, selectedLatLng, 'Test');
+                    addMarker(this, currentPosition, 'Test');
 
                     document.querySelector('#current-position')
-                        .innerHTML = `lat:${selectedLatLng.lat}, long:${selectedLatLng.lng}`;
+                        .innerHTML = `lat:${currentPosition.lat}, long:${currentPosition.lng}`;
                 }
 
                 if (!navigator.geolocation) {
@@ -57,27 +78,25 @@
                     return;
                 }
 
-                // Create a map object and specify the DOM element
-                // for display.
+                // Create a map object and update the DOM
                 const map = new google.maps.Map(document.getElementById('map'), {
                     center: currentPosition,
                     zoom: 18
                 });
 
-                map.addListener('click', placeSelected);
+                map.addListener('click', onMapClick);
 
                 // Set current location on map
-                // TODO: put current location on nearest place
                 navigator.geolocation.getCurrentPosition( position => {
-                    currentPosition =  { 
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
+                    currentPosition.lat = position.coords.latitude;
+                    currentPosition.lng = position.coords.longitude;
                     
                     map.setCenter(currentPosition);
                     addMarker(map, currentPosition, 'I\'m here');
                 });
             }
+
+
         </script>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDM9yoWb3ehc6NwnpjvAKxLAB2fGRytpnQ&callback=initMap" async defer></script>
     </body>
