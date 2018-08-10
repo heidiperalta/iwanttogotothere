@@ -24,79 +24,192 @@
             <h2>I want to go to there:</h2><span id="current-position"></span>
             
             <div class="location-form">
-                <textarea id="location-description" rows="6" placeholder="Notes"></textarea>
-                <input type="submit" value="Save Place"/>
+                <textarea id="description" rows="6" placeholder="Notes"></textarea>
+                <input type="button" value="Save Place"/>
             </div>
 
             <h2>M'Places</h2>
-            <div class="places-list-container">
-
+            <div class="mplaces-list-container">
+                <ul></ul>
             </div>
         </div>
         <script>
-            
-            // Iniciate map
-            function initMap() {
-                let currentMarker;
-                let currentPosition = { lat:40.7620582, lng:-73.9805203, placeId: null };
+            // TODO: wrap in a module
+            const IWTGTT = {};
 
-                function clearMarkers() {
-                    if (currentMarker) {
-                        currentMarker.setMap(null);
+            let map;
+            let currentMarker;
+            let currentBounds;
+            let currentNearbyPlaces = [];
+            const currentPosition = { 
+                lat:40.72802059048305,
+                lng:-74.00786531223372, 
+                placeId: null 
+            };
+            
+            const saveButton = document.querySelector('.location-form>input[type=button]');
+            const mplacesUL = document.querySelector('.mplaces-list-container ul');
+
+            function debounce(func, wait, immediate) {
+                let timeout;
+                return function() {
+                    const context = this;
+                    const args = arguments;
+                    const later = function() {
+                        timeout = null;
+                        if (!immediate) func.apply(context, args);
+                    };
+                    const callNow = immediate && !timeout;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                    if (callNow) func.apply(context, args);
+                };
+            };
+
+            // Save locations
+            function getLocations() {
+                
+                const options = {
+                    method: "GET", 
+                    mode: "cors", // no-cors, cors, *same-origin
+                    credentials: "same-origin", // include, same-origin, *omit
+                    headers: {
+                        "Content-Type": "application/json; charset=utf-8",
                     }
+                }
+
+                let boundsQuery = '';
+
+                if (currentBounds && currentBounds.north && currentBounds.east
+                        && currentBounds.south && currentBounds.west) {
+
+                    boundsQuery = `?north=${currentBounds.north}&east=${currentBounds.east}
+                        &south=${currentBounds.south}&west=${currentBounds.west}`;
+                } 
+                
+                fetch(`http://localhost:3000/api/locations${boundsQuery}`, options)
+                    .then( result => result.json())
+                    .then( mplaces => {
+                        // TODO: a more efficient way of allocating distinct places?
+                        currentNearbyPlaces = mplaces;
+                        showPlaces();
+                    })
+                    .catch( error => {
+                        console.log(`could not get m'places!`, error);
+                    });
+            }
+
+            function showPlaces() {
+                if (!currentNearbyPlaces) {
+                    mplacesUL.innerHTML = '';
+                    return;
+                }
+
+                let placesHTML = '';
+                const coords = {};
+
+                currentNearbyPlaces.forEach( mplace => {
+                    placesHTML += `<li>${mplace.name}</li>`;
+                    
+                    if (mplace.location && mplace.location.length) {
+                        coords.lng = mplace.location[0];
+                        coords.lat = mplace.location[1];
+
+                        addMarker(coords, mplace.name);
+                    }
+                });
+
+                mplacesUL.innerHTML = placesHTML;
+            }
+
+            // Save locations
+            function saveLocation(location) {
+                // TODO: check that the location (by placeId or lat/lng)
+                // is not already in list
+                const newPlace = {
+                    ...currentPosition,
+                    name: document.querySelector('#description').value
+                }
+
+                const options = {
+                    method: "PUT", 
+                    mode: "cors", // no-cors, cors, *same-origin
+                    credentials: "same-origin", // include, same-origin, *omit
+                    headers: {
+                        "Content-Type": "application/json; charset=utf-8",
+                    },
+                    body: JSON.stringify(newPlace)
                 }
                 
-                // Create a marker and set its position.
-                function addMarker(map, position, title) {
-                    
-                    currentMarker = new google.maps.Marker({
-                        map: map,
-                        position: position,
-                        title: title
+                fetch('http://localhost:3000/api/locations', options)
+                    .then( result => {
+                        console.log('location saved');
+                    })
+                    .catch( error => {
+                        console.log('could not save location!', error);
                     });
+            }
 
-                    if (map.zoom < 18) {
-                        map.setZoom(18);
-                    }
-                }
+            // Create a marker and set its position.
+            function addMarker(position, title) {
+                currentMarker = new google.maps.Marker({
+                    map: map,
+                    position: position,
+                    title: title || ''
+                });
+            }
+
+            // Iniciate map
+            function initMap() {
 
                 // Map click handler
                 function onMapClick (position) {
                     currentPosition.lat = position.latLng.lat();
-                    currentPosition.lng = position.latLng.lng();;
+                    currentPosition.lng = position.latLng.lng();
                     currentPosition.placeId = position.placeId;
 
-                    clearMarkers();
-                    addMarker(this, currentPosition, 'Test');
+                    currentMarker.setMap(null);
+                    addMarker(currentPosition, 'New place');
 
                     document.querySelector('#current-position')
                         .innerHTML = `lat:${currentPosition.lat}, long:${currentPosition.lng}`;
                 }
 
-                if (!navigator.geolocation) {
-                    console.log('location not supported');
-                    return;
+                function onBoundsChange () {
+                    currentBounds = map.getBounds().toJSON();
+                    getLocations();
                 }
 
                 // Create a map object and update the DOM
-                const map = new google.maps.Map(document.getElementById('map'), {
+                map = new google.maps.Map(document.getElementById('map'), {
                     center: currentPosition,
-                    zoom: 18
+                    zoom: 10
                 });
 
-                map.addListener('click', onMapClick);
 
                 // Set current location on map
-                navigator.geolocation.getCurrentPosition( position => {
-                    currentPosition.lat = position.coords.latitude;
-                    currentPosition.lng = position.coords.longitude;
-                    
-                    map.setCenter(currentPosition);
-                    addMarker(map, currentPosition, 'I\'m here');
-                });
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition( position => {
+                        currentPosition.lat = position.coords.latitude;
+                        currentPosition.lng = position.coords.longitude;
+                        
+                        map.panTo(currentPosition);
+
+                        // Get mplaces close by
+                        getLocations();
+
+                        if (map.zoom < 16) {
+                            map.setZoom(16);
+                        }
+                    });
+                }
+                
+                map.addListener('click', onMapClick);
+                map.addListener('bounds_changed', debounce(onBoundsChange, 500));
             }
-
-
+            
+            // Click event to save location
+            saveButton.addEventListener('click', saveLocation);
         </script>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDM9yoWb3ehc6NwnpjvAKxLAB2fGRytpnQ&callback=initMap" async defer></script>
     </body>

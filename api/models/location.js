@@ -9,14 +9,7 @@ const LocationSchema = new Schema({
     },
     notes: String,
     placeId: String,
-    lat: {
-        type: Number,
-        required: 'Latitude is required'
-    },
-    long: {
-        type: Number,
-        required: 'Longitude is required'
-    }
+    location: [ Number, Number ]
 });
 
 module.exports = mongoose.model('Location', LocationSchema);

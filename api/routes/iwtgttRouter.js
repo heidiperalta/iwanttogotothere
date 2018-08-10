@@ -18,8 +18,8 @@ router.post('/register', userController.register);
 router.post('/authenticate', userController.authenticate);
 
 // Locations
-router.get('/locations/:current', locationController.getUserLocations);
-router.post('/locations', catchErrors(locationController.saveLocation));
+router.get('/locations', locationController.getUserLocations);
+router.put('/locations', catchErrors(locationController.saveLocation));
 
 
 module.exports = router;

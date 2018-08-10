@@ -28,7 +28,6 @@ app.use(bodyParser.json());
 
 app.use('/api', routes);
 
-//app.use(express.static(__dirname + '/public'));
 app.use('/', (req, res) => {
     res.sendFile(path.resolve('./public/index.html'));
 })

@@ -7,19 +7,21 @@ const saveLocation = async (req, res) => {
     // take user id from request (logged-in user)
 
     if (!req.auth || !req.auth.user) {
-        res.send('403', 'Must be logged in to save the location');
+        res.status('403').send('Must be logged in to save the location');
+        return;
     }
 
-    if (!req.body || !req.body.lat || !req.body.long || !req.body.name) {
-        res.send('400', 'Location name, latitude and longitude are required');
+    if (!req.body || !req.body.lat || !req.body.lng || !req.body.name) {
+        res.status('400').send('Location name, latitude and longitude are required');
+        return;
     }
 
     let location = {
         user: req.auth.user,
+        placeId: req.body.placeId,
         name: req.body.name,
         notes: req.body.notes,
-        lat: req.body.lat,
-        long: req.body.long
+        location: [ req.body.lng, req.body.lat ]
     };
 
     let newLocation = await Location.create(location);
@@ -27,11 +29,31 @@ const saveLocation = async (req, res) => {
     res.send(newLocation);
 }
 
-const getUserLocations = (req, res) => {
+const getUserLocations = async (req, res) => {
     // Get user from request
     // get user's nearby locations from database
     // return x amonut of locations
-    // render page?
+    if (!req.auth || !req.auth.user) {
+        res.status('403').send('Must be logged in to save the location');
+        return;
+    }
+
+    const query = {
+        user: req.auth.user,
+        location: {
+            $geoWithin: {
+                $box: [
+                    [req.query.west, req.query.south], 
+                    [req.query.east, req.query.north]
+                ]
+            }
+        }
+    }
+
+    const locations = await Location.find(query)
+        .catch( error => console.log(error));
+
+    res.send(locations);
 }
 
 module.exports = {
