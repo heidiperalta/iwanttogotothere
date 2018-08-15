@@ -1,24 +1,26 @@
 //'use strict';
 
 const mongoose = require('mongoose');
-
 const Schema = mongoose.Schema;
-const ObjectId = Schema.ObjectId;
 
 const userProps = {
-    _id: ObjectId,
     email: {
         type: String,
-        required: 'User email is required'
+        required: 'Email is required',
+        unique: true,
+        lowercase: true,
+        trim: true
     },
     name: {
         type: String,
         required: 'User name is required'
     },
-    auth: {
-        type: String
+    auth_accounts: [],
+    password: {
+        type: String,
+        required: 'Password is required'
     },
-    password: String,
+    salt: String,
     created_date: {
         type: Date,
         default: Date.now

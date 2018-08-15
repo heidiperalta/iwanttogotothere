@@ -3,8 +3,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const bodyParser = require('body-parser');
 const routes = require('./api/routes/iwtgttRouter');
+const authRoutes = require('./api/routes/authRouter');
 
 if (process.env.NODE_ENV === 'local') {
     require('dotenv').config({ path: 'variables.env' });
@@ -23,9 +23,9 @@ mongoose.connect(process.env.DB, err => {
     }        
 }); 
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.json());
 
+app.use('/auth', authRoutes);
 app.use('/api', routes);
 
 app.use('/', (req, res) => {
