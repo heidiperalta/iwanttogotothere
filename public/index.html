@@ -6,7 +6,7 @@
                 color: #1E1E38;
             }
             .locations {
-                height: 50%;
+                height: 50vh;
             }
             .location-form input {
                 display: block;
@@ -66,15 +66,28 @@
                 };
             };
 
+            function getTokenFromCookie() {
+                if (!document.cookie) {
+                    return;
+                }
+                const cookies = document.cookie.split(';');
+                const token = cookies.find( cookie => cookie.includes('token='));
+                
+                return token && token.replace('token=','');
+            }
+
             // Save locations
             function getLocations() {
                 
+                const token = getTokenFromCookie();
+
                 const options = {
                     method: "GET", 
                     mode: "cors", // no-cors, cors, *same-origin
                     credentials: "same-origin", // include, same-origin, *omit
                     headers: {
                         "Content-Type": "application/json; charset=utf-8",
+                        "x-access-token": token
                     }
                 }
 
@@ -83,16 +96,17 @@
                 if (currentBounds && currentBounds.north && currentBounds.east
                         && currentBounds.south && currentBounds.west) {
 
-                    boundsQuery = `?north=${currentBounds.north}&east=${currentBounds.east}
-                        &south=${currentBounds.south}&west=${currentBounds.west}`;
+                    boundsQuery = `?north=${currentBounds.north}&east=${currentBounds.east}&south=${currentBounds.south}&west=${currentBounds.west}`;
                 } 
                 
-                fetch(`http://localhost:3000/api/locations${boundsQuery}`, options)
+                fetch(`/api/mplaces${boundsQuery}`, options)
                     .then( result => result.json())
                     .then( mplaces => {
                         // TODO: a more efficient way of allocating distinct places?
-                        currentNearbyPlaces = mplaces;
-                        showPlaces();
+                        if (mplaces && mplaces.length) {
+                            currentNearbyPlaces = mplaces;
+                            showPlaces();
+                        }
                     })
                     .catch( error => {
                         console.log(`could not get m'places!`, error);
@@ -126,6 +140,8 @@
             function saveLocation(location) {
                 // TODO: check that the location (by placeId or lat/lng)
                 // is not already in list
+                const token = getTokenFromCookie();
+
                 const newPlace = {
                     ...currentPosition,
                     name: document.querySelector('#description').value
@@ -137,11 +153,12 @@
                     credentials: "same-origin", // include, same-origin, *omit
                     headers: {
                         "Content-Type": "application/json; charset=utf-8",
+                        "x-access-token": token
                     },
                     body: JSON.stringify(newPlace)
                 }
                 
-                fetch('http://localhost:3000/api/locations', options)
+                fetch('/api/mplaces', options)
                     .then( result => {
                         console.log('location saved');
                     })
@@ -168,7 +185,10 @@
                     currentPosition.lng = position.latLng.lng();
                     currentPosition.placeId = position.placeId;
 
-                    currentMarker.setMap(null);
+                    if (currentMarker) {
+                        currentMarker.setMap(null);
+                    }
+
                     addMarker(currentPosition, 'New place');
 
                     document.querySelector('#current-position')
@@ -198,6 +218,7 @@
                         // Get mplaces close by
                         getLocations();
 
+                        // TODO: setBounds instead
                         if (map.zoom < 16) {
                             map.setZoom(16);
                         }

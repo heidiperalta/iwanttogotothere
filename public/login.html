@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <style>
+            .error {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <div>
+                <span class="error"></span>
+            </div>
+            <div class="input">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email"/>
+            </div>
+            <div class="input">
+                <label for="email">Password</label>
+                <input id="password" name="password" type="password"/>
+            </div>
+            <input type="button" id="login" value="Login" />
+        </div>  
+    </body>
+    <script>
+        (()=> {
+            const loginBtn = document.querySelector('#login');
+            const errorSpan = document.querySelector('span.error');
+
+            loginBtn.addEventListener('click', () => {
+                errorSpan.innerHTML = '';
+
+                const options = {
+                    method: "POST", 
+                    mode: "cors", // no-cors, cors, *same-origin
+                    credentials: "same-origin", // include, same-origin, *omit
+                    headers: {
+                        "Content-Type": "application/json; charset=utf-8",
+                    },
+                    body: JSON.stringify({
+                        email: document.querySelector('#email').value,
+                        password: document.querySelector('#password').value
+                    })
+                }
+
+                fetch('/login', options)
+                    .then( async result => {
+                        const res = await result.json();
+
+                        if (res.data && res.data.length && res.data[0].token) {
+                            const token = res.data[0].token;
+                            
+                            document.cookie = `token=${token}`;
+                            window.location = '/mplaces';
+                        }
+                        else {
+                            if (res.messages && res.messages.length) {
+                                res.messages.forEach( msg => {
+                                    errorSpan.innerHTML = `${msg} <br/>`;
+                                });
+                            }
+                        }
+                    })
+                    .catch( error => {
+                        errorSpan.innerHTML = error;
+                    });
+            });
+        })()
+    </script>
+</html> 

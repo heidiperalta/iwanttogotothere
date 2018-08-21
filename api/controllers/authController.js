@@ -5,61 +5,89 @@ const bcrypt = require('bcryptjs');
 
 const User = require('../models/user').User;
 
-const register = async (req, res) => {
+const setTokenHeaders = (req, user) => {
+    
+} 
+
+/* TODO list: 
+    - create email confirmation flow
+*/
+const register = async (req, res, next) => {
     const response = { status: 200, messages: [], data: [] };
-    /* TODO list: 
-        - create email confirmation flow
-    */
-    let passwordHash;
+    
     const salt  = bcrypt.genSaltSync();
-
-    if (req.body.password) {
-        passwordHash = bcrypt.hashSync(req.body.password, salt);
-    }
-
+    const passwordHash = bcrypt.hashSync(req.body.password, salt);
+    
     const user = await User.create({
         name: req.body.name,
         email: req.body.email,
         password: passwordHash,
         salt: salt
     })
-    .catch( err => {
-        if (err.message.includes('$email_1 dup key')) {
+    // Email unique validation
+    .catch( error => {
+        if (error.message.includes('$email_1 dup key')) {
             response.status = 400;
             response.messages.push('An account with this email already exists, forgot password?');
         }
         else {
             response.status = 500;
-            response.messages.push(err.message);
+            response.messages.push(error.message);
         }
     });
 
-    if (user) {
-        let token = jwt.sign({ id: user._id }, 
-            process.env.REGISTRATION_SECRET, { expiresIn: 86400 });
-        
-        req.user = token;
+    // Return error message from catch block
+    if (!user) {
+        res.status(response.status).json(response);
+        return;
     }
 
-    res.status(response.status).json(response);
+    let token = jwt.sign({ user: user._id }, 
+        process.env.AUTH_SECRET, { expiresIn: 86400 });
+    
+    req.user = token;
+
+    res.redirect('/mplaces');
 }
 
-const authenticate = (req, res) => {
-    let creds;
+/*
+ * Login handler
+*/
+const login = async (req, res) => {
+    const response = { status: 200, messages: [], data: [] };
 
-    if (req.body && req.body.email) {
-        creds = { email: req.body.email, ayayay: req.body.password };
+    const sendInvalidStatus = () => {
+        response.status = 403;
+        response.messages.push('Invalid email or password!');
+
+        res.status(response.status).json(response);
+        return;
+    } 
+    
+    const user = await User.findOne({ email: req.body.email })
+        .catch( error => console.log(error) );
+
+    // User is not registered
+    if (!user) {
+        sendInvalidStatus();
+    }
+
+    if (bcrypt.compareSync(req.body.password, user.password)) {
+        let token = jwt.sign({ id: user._id }, process.env.AUTH_SECRET, 
+            { expiresIn: 86400 });
+
+        response.data.push({ token: token });
+    }
+    // Wrong password
+    else {
+        sendInvalidStatus();
     }
     
-    // get user from the database with that email
-    // check if passwords match
-    // return jwt to be used back and forth 
-
-    res.json(creds);
+    res.status(response.status).json(response);
 }
 
 
 module.exports = {
     register,
-    authenticate
+    login
 }
