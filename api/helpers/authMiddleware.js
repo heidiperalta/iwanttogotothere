@@ -78,7 +78,7 @@ exports.validateRegistration = (req, res, next) => {
 exports.authorizeCookie = (req, res, next) => {
     const token = req.cookies['token'];
 
-    authorize(token, req, res, next, (res) => { 
+    authorize(req, res, next, token, (res) => { 
         res.status(403).redirect('/login') ;
     });
 }
@@ -86,12 +86,12 @@ exports.authorizeCookie = (req, res, next) => {
 exports.authorizeApiRequest = (req, res, next) => {
     const token = req.headers['x-access-token'];
 
-    authorize(token, req, res, next, (res) => { 
+    authorize(req, res, next, token, (res) => { 
         res.status(403).send('Unauthorized request');
     });
 }
 
-const authorize = (token, req, res, next, errorHandlerFn) => {
+const authorize = (req, res, next, token, errorHandlerFn) => {
     if (!token) {
         errorHandlerFn(res);
         return;
