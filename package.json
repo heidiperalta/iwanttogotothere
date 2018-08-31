@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha --exit",
+    "postinstall": "cd mapp && npm install",
     "serve": "npm run build --prefix ./mapp && npm start --prefix ./"
   },
   "repository": {
