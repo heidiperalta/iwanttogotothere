@@ -4,7 +4,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./api/routes/authRouter');
-const { pageRoutes, apiRoutes } = require('./api/routes/mplaceRouter');
+const path = require('path');
+const { apiRoutes } = require('./api/routes/mplaceRouter');
 
 if (process.env.NODE_ENV === 'local') {
     require('dotenv').config({ path: 'variables.env' });
@@ -25,9 +26,12 @@ mongoose.connect(process.env.DB, err => {
 
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.static('./mapp/build'));
 
-app.use('/', authRoutes);
-app.use('/mplaces', pageRoutes);
+app.use('/', (req, res) => {
+    res.sendFile(path.resolve('./mapp/build/index.html'));
+});
+app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 
 app.listen(port, () => {

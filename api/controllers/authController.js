@@ -5,9 +5,6 @@ const bcrypt = require('bcryptjs');
 
 const User = require('../models/user').User;
 
-const setTokenHeaders = (req, user) => {
-    
-} 
 
 /* TODO list: 
     - create email confirmation flow

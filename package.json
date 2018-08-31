@@ -4,7 +4,8 @@
   "description": "API service for IWTGTT mobile app",
   "main": "server.js",
   "scripts": {
-    "test": "mocha --exit"
+    "test": "mocha --exit",
+    "serve": "npm run build --prefix ./mapp && npm start --prefix ./"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,5 @@
     "mongoose": "^5.0.16",
     "should": "^13.2.3",
     "supertest": "^3.1.0"
-  },
-  "devDependencies": {}
+  }
 }
