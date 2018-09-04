@@ -18,8 +18,8 @@ const options = {
     }
 }
 
-const fetchThis = async (url) => {
-    return await fetch(url, options)
+const fetchThis = (url) => {
+    return fetch(url, options)
         .then(resp => resp.json())
         .catch(error => error);
 }

@@ -43,6 +43,10 @@ input[type="submit"] {
     color: white;
 }
 
+.error {
+    color: red;
+}
+
 /* @media only screen and (max-width: 375px) {
     form {
         width: 276px;

@@ -28,11 +28,12 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.static('./mapp/build'));
 
+app.use('/auth', authRoutes);
+app.use('/api', apiRoutes);
+
 app.use('/', (req, res) => {
     res.sendFile(path.resolve('./mapp/build/index.html'));
 });
-app.use('/auth', authRoutes);
-app.use('/api', apiRoutes);
 
 app.listen(port, () => {
     console.log(`iwtgtt Api server listening on port ${port}`);

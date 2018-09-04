@@ -7,7 +7,7 @@ class Register extends Component {
   registerUser = (e) => {
     e.preventDefault();
 
-    const { name, email, password, confirmPassword } = this.refs;
+    const { name, email, password, confirmPassword, errorMessage } = this.refs;
 
     const newUser = {
       name: name.value,
@@ -16,11 +16,25 @@ class Register extends Component {
       passwordConfirmation: confirmPassword.value
     }
 
-    try {
-      post('/auth/register', newUser)
-    } catch (error) {
-      console.log(error);
-    }
+    post('/auth/register', newUser)
+      .then( response => {
+        if (!response || !response.status) {
+          // TODO: an error occurred
+          return;
+        }
+
+        if (response.status !== 200) {
+          response.messages.forEach( message => {
+            console.log(message);
+            errorMessage.value = message;
+          });
+          return;
+        }
+
+        // get the token from the response and store it in the cookie
+        // to extract and send as x-access-token header in subsequent api requests
+
+      });
   }
 
   render() {
@@ -39,6 +53,8 @@ class Register extends Component {
         <input type="password" ref="confirmPassword" required />
 
         <input type="submit" value="Register!" />
+        
+        <span className="error" ref="errorMessage"></span>
       </form>
     );
   }

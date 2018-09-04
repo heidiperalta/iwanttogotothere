@@ -21,8 +21,8 @@ const register = async (req, res, next) => {
         password: passwordHash,
         salt: salt
     })
-    // Email unique validation
     .catch( error => {
+        // Email unique validation
         if (error.message.includes('$email_1 dup key')) {
             response.status = 400;
             response.messages.push('An account with this email already exists, forgot password?');
