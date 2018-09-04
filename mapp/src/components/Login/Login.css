@@ -10,7 +10,7 @@
     text-align: center;
 }
 
-form {
+.login-container form {
     width: 276px;
     margin: 12% auto;
     background: #f4f3f7;
@@ -24,7 +24,7 @@ label, input[type="submit"] {
     margin-bottom: 5px;
 }
 
-.login-form input:not([type="submit"]) {
+input:not([type="submit"]) {
     width: 98%;
     margin-left: 8px;
     line-height: 2em;
@@ -34,7 +34,7 @@ label, input[type="submit"] {
     color: #333;
 }
 
-input[type="submit"] {
+.login-form input[type="submit"] {
     width: 100%;
     line-height: 2em;
     background-color: #9c92ac;

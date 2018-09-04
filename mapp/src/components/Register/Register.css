@@ -10,7 +10,7 @@
     text-align: center;
 }
 
-form {
+.register-form form {
     width: 276px;
     margin: 12% auto;
     background: #f4f3f7;
@@ -18,7 +18,7 @@ form {
     padding: 20px 79px;
 }
 
-label, input[type="submit"] {
+.register-form label, input[type="submit"] {
     display: block;
     margin-top: 20px;
     margin-bottom: 5px;
@@ -43,9 +43,6 @@ input[type="submit"] {
     color: white;
 }
 
-.error {
-    color: red;
-}
 
 /* @media only screen and (max-width: 375px) {
     form {

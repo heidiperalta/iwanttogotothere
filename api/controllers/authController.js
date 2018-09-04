@@ -58,7 +58,6 @@ const login = async (req, res) => {
         response.messages.push('Invalid email or password!');
 
         res.status(response.status).json(response);
-        return;
     } 
     
     const user = await User.findOne({ email: req.body.email })
@@ -66,7 +65,7 @@ const login = async (req, res) => {
 
     // User is not registered
     if (!user) {
-        sendInvalidStatus();
+        return sendInvalidStatus();
     }
 
     if (bcrypt.compareSync(req.body.password, user.password)) {
@@ -77,7 +76,7 @@ const login = async (req, res) => {
     }
     // Wrong password
     else {
-        sendInvalidStatus();
+        return sendInvalidStatus();
     }
     
     res.status(response.status).json(response);

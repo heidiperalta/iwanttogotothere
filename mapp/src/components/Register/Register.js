@@ -3,11 +3,16 @@ import './Register.css';
 import { post } from '../../helpers/fetchHelper';
 
 class Register extends Component {
+  state = {
+    messages: []
+  };
 
   registerUser = (e) => {
     e.preventDefault();
 
-    const { name, email, password, confirmPassword, errorMessage } = this.refs;
+    this.state.messages = [];
+
+    const { name, email, password, confirmPassword } = this.refs;
 
     const newUser = {
       name: name.value,
@@ -24,18 +29,19 @@ class Register extends Component {
         }
 
         if (response.status !== 200) {
-          response.messages.forEach( message => {
-            console.log(message);
-            errorMessage.value = message;
+          this.setState({
+            messages: [...response.messages]
           });
+
           return;
         }
 
+        this.props.history.push('/mplaces');
         // get the token from the response and store it in the cookie
         // to extract and send as x-access-token header in subsequent api requests
 
       });
-  }
+  };
 
   render() {
     return (
@@ -54,10 +60,11 @@ class Register extends Component {
 
         <input type="submit" value="Register!" />
         
-        <span className="error" ref="errorMessage"></span>
+        <span className="error"> Please review the following:</span>
+        <ul className="error"></ul>
       </form>
     );
-  }
+  };
 }
 
 export default Register;
