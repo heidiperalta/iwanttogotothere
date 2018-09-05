@@ -7,7 +7,7 @@ const getTokenFromCookie = () => {
     const token = cookies.find( cookie => cookie.includes('token='));
     
     return (token && token.replace('token=','')) || '';
-}
+};
 
 const options = {
     mode: "cors",
@@ -16,13 +16,17 @@ const options = {
         "Content-Type": "application/json; charset=utf-8",
         "x-access-token": getTokenFromCookie()
     }
-}
+};
 
 const fetchThis = (url) => {
     return fetch(url, options)
         .then(resp => resp.json())
         .catch(error => error);
-}
+};
+
+export function setTokenCookie (token) {
+    document.cookie = `token=${token}`;
+};
 
 export function get (url, params) {
     options.method = 'GET';

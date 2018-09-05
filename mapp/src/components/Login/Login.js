@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./Login.css";
-import { post } from '../../helpers/fetchHelper';
+import { post, setTokenCookie } from '../../helpers/fetchHelper';
 
 class Login extends Component {
   state = {
@@ -18,18 +18,28 @@ class Login extends Component {
     }
 
     post('/auth/login', creds)
-      .then( response => {
+      .then( res => {
 
-        if (response.status !== 200) {
+        // Show error message if received
+        if (res.messages && res.messages.length) {
           this.setState({
-           errorMessage: response.messages[0]
+            errorMessage: res.messages[0]
           });
 
           return;
         }
 
+        if (res.data && res.data.length && res.data[0].token) {
+          setTokenCookie(res.data[0].token);
+        }
+        else {
+          this.setState({
+            errorMessage: 'Whoops! something went wrong... sorry :('
+          });
+        }
+
         // Set user in App state
-        this.props.setUser(response);
+        this.props.setUser(res.data[0].token);
 
       });
 
