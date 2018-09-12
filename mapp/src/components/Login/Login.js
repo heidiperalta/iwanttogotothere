@@ -6,8 +6,14 @@ class Login extends Component {
   state = {
     errorMessage: ""
   }
+
+  setErrorMessage = (message) => {
+    this.setState({
+      errorMessage: message || 'Whoops! something went wrong... sorry :('
+    });
+  };
   
-  loginHandler = (e) => {
+  loginHandler = async (e) => {
     e.preventDefault();
 
     const { email, password } = this.refs;
@@ -17,31 +23,28 @@ class Login extends Component {
       password: password.value
     }
 
-    post('/auth/login', creds)
-      .then( res => {
+    const loginRes = await post('/auth/login', creds);
 
-        // Show error message if received
-        if (res.messages && res.messages.length) {
-          this.setState({
-            errorMessage: res.messages[0]
-          });
+    if (!loginRes) {
+      this.setErrorMessage();
+      return;
+    }
 
-          return;
-        }
+    // Show error message if received
+    if (loginRes.messages && loginRes.messages.length) {
+      this.setErrorMessage(loginRes.messages[0]);
+      return;
+    }
 
-        if (res.data && res.data.length && res.data[0].token) {
-          setTokenCookie(res.data[0].token);
-        }
-        else {
-          this.setState({
-            errorMessage: 'Whoops! something went wrong... sorry :('
-          });
-        }
+    // Set token cookie for subsequent api requests
+    if (loginRes.data && loginRes.data.length && loginRes.data.token) {
+      setTokenCookie(loginRes.data.token);
 
-        // Set user in App state
-        this.props.setUser(res.data[0].token);
-
-      });
+      this.props.setUser(loginRes.data.user);
+    }
+    else {
+      this.setErrorMessage();
+    }
 
   };
 

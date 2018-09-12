@@ -7,9 +7,9 @@ import App from './App/App';
 const Router = () => (
     <BrowserRouter>
         <Switch>
+            <Route exact path="/" component={App} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
-            <Route exact path="/mplaces" component={App} />
         </Switch>
     </BrowserRouter>
 );

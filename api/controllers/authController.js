@@ -11,7 +11,6 @@ const User = require('../models/user').User;
 */
 const register = async (req, res, next) => {
     const response = { status: 200, messages: [], data: [] };
-    
     const salt  = bcrypt.genSaltSync();
     const passwordHash = bcrypt.hashSync(req.body.password, salt);
     
@@ -51,12 +50,11 @@ const register = async (req, res, next) => {
  * Login handler
 */
 const login = async (req, res) => {
-    const response = { status: 200, messages: [], data: [] };
+    const response = { status: 200, messages: [], data: {} };
 
-    const sendInvalidStatus = () => {
+    const unauthorizedRes = () => {
         response.status = 403;
         response.messages.push('Invalid email or password!');
-
         res.status(response.status).json(response);
     } 
     
@@ -65,18 +63,24 @@ const login = async (req, res) => {
 
     // User is not registered
     if (!user) {
-        return sendInvalidStatus();
+        return unauthorizedRes();
     }
 
-    if (bcrypt.compareSync(req.body.password, user.password)) {
-        let token = jwt.sign({ id: user._id }, process.env.AUTH_SECRET, 
-            { expiresIn: 86400 });
+    const { email, name, id } = user;
 
-        response.data.push({ token: token });
+    if (bcrypt.compareSync(req.body.password, user.password)) {
+        const token = jwt.sign(
+            { id: user._id }, 
+            process.env.AUTH_SECRET, 
+            { expiresIn: 86400 }
+        );
+        
+        response.data.token = token;
+        response.data.user = { email, name, id };
     }
     // Wrong password
     else {
-        return sendInvalidStatus();
+        return unauthorizedRes();
     }
     
     res.status(response.status).json(response);

@@ -1,4 +1,4 @@
-const getTokenFromCookie = () => {
+export function getTokenFromCookie () {
     if (!document.cookie) {
         return;
     }

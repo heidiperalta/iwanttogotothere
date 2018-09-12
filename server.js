@@ -26,11 +26,11 @@ mongoose.connect(process.env.DB, err => {
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.static('./mapp/build'));
 
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 
+app.use(express.static('./mapp/build'));
 app.use('/', (req, res) => {
     res.sendFile(path.resolve('./mapp/build/index.html'));
 });

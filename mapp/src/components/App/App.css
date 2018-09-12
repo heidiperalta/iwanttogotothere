@@ -7,18 +7,19 @@ html {
 }
 
 .side-bar {
-  display: none;
+  height: 40vh;
 }
 
 .main_container {
     display: flex;
+    flex-flow: column;
+    flex-direction: column-reverse;
     height: 100vh;
-    background: var(--purple-bg-pattern);
+    background-image: var(--purple-bg-pattern);
 }
 
 .main-content_container {
-  width: 80%;
-  height: 100vh;
+  height: 60vh;
 }
 
 .error {
@@ -27,11 +28,21 @@ html {
 
 @media only screen and (min-width: 1024px) {
   
-  .side-bar {
+  .info-bar {
       display: block;
       background-color: #DFDBE5;
       background-image: var(--purple-bg-pattern);
       width: 20%;
       padding: 20px;
+  }
+
+  .main_container {
+    flex-flow: row;
+  }
+
+  .main-content_container {
+    background-image: none;
+    width: 80%;
+    height: 100vh;
   }
 }

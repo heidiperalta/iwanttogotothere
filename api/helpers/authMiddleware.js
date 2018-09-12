@@ -86,24 +86,23 @@ exports.authorizeCookie = (req, res, next) => {
 exports.authorizeApiRequest = (req, res, next) => {
     const token = req.headers['x-access-token'];
 
-    authorize(req, res, next, token, (res) => { 
-        res.status(403).send('Unauthorized request');
+    authorize(req, next, token, (error) => { 
+        res.status(403).send(`Unauthorized request ${error}`);
     });
 }
 
-const authorize = (req, res, next, token, errorHandlerFn) => {
+const authorize = (req, next, token, errorHandlerFn) => {
     if (!token) {
-        errorHandlerFn(res);
+        errorHandlerFn();
         return;
     }
     
     jwt.verify(token, process.env.AUTH_SECRET, (error, verifiedToken) => {
         if (error || !verifiedToken) {
-            errorHandlerFn(res);
+            errorHandlerFn(error);
             return;
         }
         
-        // TODO: check token expiration
         req.user = verifiedToken.id;
         next();
     });

@@ -4,18 +4,18 @@
 
 const express = require('express');
 
-const mplacesController = require('../controllers/userController');
+const mplacesController = require('../controllers/mplaceController');
 
 const { catchErrors } = require('../helpers/errorHandlers');
 const { authorizeCookie, authorizeApiRequest } = require('../helpers/authMiddleware.js');
 
 /*
-*   DEPRECATED Page Routes
+*   Page Routes
 */
 exports.pageRoutes = (() => {
     const router = express.Router();
 
-    // Locations
+    // MPlaces
     router.get('/', authorizeCookie, mplacesController.home);
 
     return router;
@@ -27,8 +27,8 @@ exports.pageRoutes = (() => {
 exports.apiRoutes = (() => {
     const router = express.Router();
 
-    router.get('/mplaces', authorizeApiRequest, mplacesController.getUserLocations);
-    router.post('/mplaces', authorizeApiRequest, mplacesController.saveLocation);
+    router.get('/mplaces', authorizeApiRequest, mplacesController.getUserMPlaces);
+    router.post('/mplaces', authorizeApiRequest, mplacesController.saveMPlace);
 
     return router;
 })();
