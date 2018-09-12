@@ -43,15 +43,15 @@ class App extends Component {
     }
 
     if (mPlacesRes.data && mPlacesRes.data.length 
-      && mPlacesRes.data.mPlaces) {
+      && mPlacesRes.data[0].mplaces) {
       
-        this.setMplaces(mPlacesRes.data.mPlaces);
+        this.setMplaces(mPlacesRes.data[0].mplaces);
     }
     else {
       this.setErrorMessage();
     }
   }
-
+  
   componentWillMount() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition( position => {

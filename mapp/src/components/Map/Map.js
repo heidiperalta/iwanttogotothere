@@ -5,6 +5,7 @@ import Marker from './Marker';
 const key = 'AIzaSyDM9yoWb3ehc6NwnpjvAKxLAB2fGRytpnQ';
 
 class Map extends Component {
+
   static defaultProps = {
     center: {
       lat: 40.72802059048305,
@@ -14,15 +15,21 @@ class Map extends Component {
   };
 
   render() {
-    const mPlaces = this.props.mPlaces || [];
+    const { mPlaces, center, zoom } = this.props;
 
     return (
       <GoogleMapsReact
         bootstrapURLKeys={{ key }}
-        defaultCenter={this.props.center}
-        defaultZoom={this.props.zoom}
+        defaultCenter={center}
+        yesIWantToUseGoogleMapApiInternals
+        defaultZoom={zoom}
       >
-        {mPlaces.forEach( mPlace => {<Marker name={mPlace.name} />})}
+        { mPlaces.map( mplace => (
+          <Marker 
+            lng={mplace.location[0]} 
+            lat={mplace.location[1]} 
+            text={mplace.name} />
+        ))}
       </GoogleMapsReact>
     );
   }

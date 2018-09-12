@@ -37,7 +37,7 @@ class Login extends Component {
     }
 
     // Set token cookie for subsequent api requests
-    if (loginRes.data && loginRes.data.length && loginRes.data.token) {
+    if (loginRes.data && loginRes.data.token) {
       setTokenCookie(loginRes.data.token);
 
       this.props.setUser(loginRes.data.user);

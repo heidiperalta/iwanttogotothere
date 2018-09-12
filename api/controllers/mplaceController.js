@@ -4,6 +4,10 @@ const path = require('path');
 const { Location, projectionFields } = require('../models/mplace');
 
 
+/*
+* Response Helpers
+*/
+
 const responseBody = { status: 200, messages: [], data: [] };
 
 const setResponse = (res, status, message) => {
@@ -17,6 +21,7 @@ const setResponse = (res, status, message) => {
     
     res.status(responseBody.status).json(responseBody);
 }
+
 
 /*
 * Route Handlers
@@ -52,7 +57,7 @@ const saveMPlace = async (req, res) => {
         location: [ req.body.lng, req.body.lat ]
     };
 
-    const newMPlace = await MPlace.create(location)
+    const newMPlace = await Location.create(location)
         .catch( error => responseBody.messages.push(error));
 
     if (newMPlace) {
