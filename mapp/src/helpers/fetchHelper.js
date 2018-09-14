@@ -6,7 +6,7 @@ export function getTokenFromCookie () {
     const cookies = document.cookie.split(';');
     const token = cookies.find( cookie => cookie.includes('token='));
     
-    return (token && token.replace('token=','')) || '';
+    return (token && token.replace('token=','')) || undefined;
 };
 
 const options = {

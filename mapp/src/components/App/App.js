@@ -26,9 +26,9 @@ class App extends Component {
     this.setState({ mPlaces });
   }
 
-  getMplaces = async (currentLatLng) => {
-
-    const query = `lat=${currentLatLng.lat}&long=${currentLatLng.long}`;
+  getMplaces = async (coords) => {
+    const query = `lat=${coords.lat}&long=${coords.long}`;
+    
     const mPlacesRes = await get(`/api/mplaces/?${query}`);
 
     if (!mPlacesRes) {
@@ -51,24 +51,18 @@ class App extends Component {
       this.setErrorMessage();
     }
   }
-  
+
   componentWillMount() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition( position => {
-            this.getMplaces({
-              lat: position.coords.latitude,
-              long: position.coords.longitude
-            });
-        });
-    }
+    this.setState({ user: getTokenFromCookie() });
   }
-
+  
   componentDidMount() {
-    const token = getTokenFromCookie();
+    if (this.state.user && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition( position => {
+            const {latitude, longitude} = position.coords;
 
-    // No
-    if (token) {
-      this.setState({ user: token });
+            this.getMplaces({ lat: latitude, long: longitude});
+        });
     }
   }
 
@@ -76,10 +70,13 @@ class App extends Component {
     if (!this.state.user) {
       return (
         <div className="main_container">
+
           <Sidebar />
+
           <div className="main-content_container">
             <Login setUser={this.setUser} />
           </div>
+
         </div>
       );
     }
