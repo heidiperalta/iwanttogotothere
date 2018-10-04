@@ -12,6 +12,38 @@ class App extends Component {
     mPlaces: []
   };
 
+  constructor() {
+    super();
+
+    const token = getTokenFromCookie();
+
+    // TODO: remove check for this.state.user when I get anonymous coords
+    // from browser
+    if (token && navigator.geolocation) {
+      
+      // Get initial list of places
+      navigator.geolocation.getCurrentPosition( position => {
+            
+        const { latitude, longitude } = position.coords;
+        const apiResponse = this.getMplaces({ 
+          lat: latitude, 
+          long: longitude 
+        });
+
+        if (apiResponse.error) {
+          this.setErrorMessage(apiResponse.error);
+          return;
+        }
+
+        //this.setMplaces(apiResponse.mplaces);
+        this.setState({
+          user: token,
+          mPlaces: apiResponse.mplaces
+        })
+      });
+    }
+  }
+
   setErrorMessage = message => {
     this.setState({
       errorMessage: message || "Whoops! something went wrong... sorry :("
@@ -29,41 +61,26 @@ class App extends Component {
   getMplaces = async (coords) => {
     const query = `lat=${coords.lat}&long=${coords.long}`;
     
-    const mPlacesRes = await get(`/api/mplaces/?${query}`);
+    const mPlacesReq = await get(`/api/mplaces/?${query}`);
+    const mPlacesRes = { error: undefined, mplaces: [] };
 
-    if (!mPlacesRes) {
-      this.setErrorMessage();
+    if (!mPlacesReq) {
+      mPlacesRes.error = `Error retrieving m'places`;
+      return;
+    }
+    
+    if (mPlacesReq.messages && mPlacesReq.messages.length) {
+      mPlacesRes.error = mPlacesReq.messages[0];
       return;
     }
 
-    // Show error message if received
-    if (mPlacesRes.messages && mPlacesRes.messages.length) {
-      this.setErrorMessage(mPlacesRes.messages[0]);
-      return;
-    }
-
-    if (mPlacesRes.data && mPlacesRes.data.length 
-      && mPlacesRes.data[0].mplaces) {
+    if (mPlacesReq.data && mPlacesReq.data.length 
+      && mPlacesReq.data[0].mplaces) {
       
-        this.setMplaces(mPlacesRes.data[0].mplaces);
+      mPlacesRes.mplaces = mPlacesReq.data[0].mplaces;
     }
-    else {
-      this.setErrorMessage();
-    }
-  }
-
-  componentWillMount() {
-    this.setState({ user: getTokenFromCookie() });
-  }
-  
-  componentDidMount() {
-    if (this.state.user && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition( position => {
-            const {latitude, longitude} = position.coords;
-
-            this.getMplaces({ lat: latitude, long: longitude});
-        });
-    }
+   
+    return mPlacesRes;
   }
 
   render() {

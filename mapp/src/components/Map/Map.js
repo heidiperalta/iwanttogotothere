@@ -15,7 +15,8 @@ class Map extends Component {
   };
 
   render() {
-    const { mPlaces, center, zoom } = this.props;
+    let { mPlaces, center, zoom } = this.props;
+    mPlaces = mPlaces || [];
 
     return (
       <GoogleMapsReact
